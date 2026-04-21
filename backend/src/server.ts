@@ -1,4 +1,5 @@
 import express from 'express';
+import { prisma } from './config/prisma';
 
 const app = express();
 
@@ -8,6 +9,11 @@ app.use(express.json());
 
 app.get('/', (req, res) => {
   res.send('API is running 🚀');
+});
+
+app.get('/test-db', async (req, res) => {
+  const links = await prisma.link.findMany();
+  res.json(links);
 });
 
 app.listen(PORT, () => {

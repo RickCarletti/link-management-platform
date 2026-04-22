@@ -1,6 +1,6 @@
 import { prisma } from '../config/prisma.js';
 import { createAuditLog } from './audit.service.js';
-import { hashPassword } from '../utils/password.js';
+import { comparePassword, hashPassword } from '../utils/password.js';
 
 export const createUser = async (data: {
   name: string;
@@ -102,4 +102,22 @@ export const deleteUser = async (id: string) => {
 
     return true;
   });
+};
+
+export const authenticateUser = async (email: string, password: string) => {
+  const user = await prisma.user.findUnique({
+    where: { email },
+  });
+
+  if (!user) {
+    throw new Error('Invalid credentials');
+  }
+
+  const isValid = await comparePassword(password, user.password);
+
+  if (!isValid) {
+    throw new Error('Invalid credentials');
+  }
+
+  return user;
 };

@@ -21,6 +21,7 @@ services:
       - db
     environment:
       DATABASE_URL: ${DATABASE_URL}
+      JWT_SECRET: ${JWT_SECRET}
     ports:
       - "${BACKEND_PORT:-3000}:3000"
     command: sh -c "npx prisma migrate deploy && node dist/server.js"

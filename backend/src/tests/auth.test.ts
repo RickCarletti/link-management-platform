@@ -12,7 +12,7 @@ describe('Auth - Register', () => {
     await prisma.auditLog.deleteMany();
     await prisma.user.deleteMany();
   });
-  
+
   it('should register a user', async () => {
     const res = await request(app).post('/auth/register').send({
       name: 'Ricardo',
@@ -45,6 +45,52 @@ describe('Auth - Register', () => {
     const res = await request(app).post('/auth/register').send({
       email: 'test@test.com',
     });
+
+    expect(res.status).toBe(400);
+  });
+
+  it('should login successfully', async () => {
+    await request(app).post('/auth/register').send({
+      name: 'Ricardo',
+      email: 'ricardo@test.com',
+      password: '123456',
+    });
+
+    const res = await request(app).post('/auth/login').send({
+      email: 'ricardo@test.com',
+      password: '123456',
+    });
+
+    expect(res.status).toBe(200);
+    expect(res.body.token).toBeDefined();
+  });
+
+  it('should reject invalid credentials', async () => {
+    await request(app).post('/auth/register').send({
+      name: 'Ricardo',
+      email: 'ricardo@test.com',
+      password: '123456',
+    });
+
+    const res = await request(app).post('/auth/login').send({
+      email: 'ricardo@test.com',
+      password: 'wrong',
+    });
+
+    expect(res.status).toBe(401);
+  });
+
+  it('should reject non-existing user', async () => {
+    const res = await request(app).post('/auth/login').send({
+      email: 'notfound@test.com',
+      password: '123456',
+    });
+
+    expect(res.status).toBe(401);
+  });
+
+  it('should validate required fields', async () => {
+    const res = await request(app).post('/auth/login').send({});
 
     expect(res.status).toBe(400);
   });

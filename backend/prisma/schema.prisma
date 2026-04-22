@@ -5,6 +5,15 @@ generator client {
 datasource db {
   provider = "postgresql"
 }
+model AuditLog {
+  id        String   @id @default(uuid())
+  tableName String
+  recordId  String
+  action    String   // CREATE | UPDATE | DELETE
+  oldData   Json?
+  newData   Json?
+  createdAt DateTime @default(now())
+}
 
 model Link {
   id        String   @id @default(uuid())

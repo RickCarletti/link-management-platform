@@ -1,5 +1,6 @@
 import { prisma } from '../config/prisma.js';
 import { createAuditLog } from './audit.service.js';
+import { hashPassword } from '../utils/password.js';
 
 export const createUser = async (data: {
   name: string;
@@ -15,8 +16,13 @@ export const createUser = async (data: {
       throw new Error('Email already in use');
     }
 
+    const hashedPassword = await hashPassword(data.password);
+
     const user = await tx.user.create({
-      data,
+      data: {
+        ...data,
+        password: hashedPassword,
+      },
     });
 
     await createAuditLog(
@@ -44,6 +50,10 @@ export const updateUser = async (
 
     if (!oldUser) {
       throw new Error('User not found');
+    }
+
+    if (data.password) {
+      data.password = await hashPassword(data.password);
     }
 
     const updatedUser = await tx.user.update({

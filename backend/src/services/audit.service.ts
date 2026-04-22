@@ -5,7 +5,7 @@ export const createAuditLog = async ({
   recordId,
   action,
   oldData,
-  newData
+  newData,
 }: {
   tableName: string;
   recordId: string;
@@ -19,7 +19,7 @@ export const createAuditLog = async ({
       recordId,
       action,
       oldData,
-      newData
-    }
+      newData,
+    },
   });
 };

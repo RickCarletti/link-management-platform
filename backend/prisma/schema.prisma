@@ -5,6 +5,7 @@ generator client {
 datasource db {
   provider = "postgresql"
 }
+
 model AuditLog {
   id        String   @id @default(uuid())
   tableName String
@@ -13,6 +14,15 @@ model AuditLog {
   oldData   Json?
   newData   Json?
   createdAt DateTime @default(now())
+}
+
+model User {
+  id        String   @id @default(uuid())
+  name      String
+  email     String   @unique
+  password  String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model Link {

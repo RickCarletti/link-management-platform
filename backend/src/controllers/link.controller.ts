@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import { createLink, resolveLink } from '../services/link.service.js';
+import { createLink, getRecentLinks, resolveLink } from '../services/link.service.js';
 import { AuthRequest } from '../middlewares/auth.middleware.js';
 
 const isValidUrl = (url: string) => {
@@ -72,6 +72,24 @@ export const createLinkController = async (req: AuthRequest, res: Response) => {
   } catch (error) {
     return res.status(500).json({
       message: 'Failed to create link',
+    });
+  }
+};
+
+export const getRecentLinksController = async (
+  req: AuthRequest,
+  res: Response,
+) => {
+  try {
+    // Não vai usar os usuarios, só para pegar todos os links recentes,
+    // const userId = req.user?.userId; // caso já tenha auth middleware
+
+    const recentLinks = await getRecentLinks();
+
+    return res.status(200).json(recentLinks);
+  } catch (error) {
+    return res.status(500).json({
+      message: 'Failed to fetch recent links',
     });
   }
 };

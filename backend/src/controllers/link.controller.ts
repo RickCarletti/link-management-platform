@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import { createLink } from '../services/link.service.js';
+import { createLink, resolveLink } from '../services/link.service.js';
 import { AuthRequest } from '../middlewares/auth.middleware.js';
 
 const isValidUrl = (url: string) => {
@@ -8,6 +8,42 @@ const isValidUrl = (url: string) => {
     return true;
   } catch {
     return false;
+  }
+};
+
+export const resolveLinkController = async (req: Request, res: Response) => {
+  try {
+    const { code } = req.params;
+
+    const ip =
+      req.headers['x-forwarded-for']?.toString().split(',')[0] ||
+      req.socket.remoteAddress;
+
+    const userAgent = req.headers['user-agent'];
+
+    const originalUrl = await resolveLink(
+      Array.isArray(code) ? code[0] : code,
+      {
+        ip,
+        userAgent,
+      },
+    );
+
+    // redirect real para a URL original
+    return res.redirect(302, originalUrl);
+
+    // alternativa sem redirecionamento, apenas retornando a URL original
+    // return res.status(200).json({ url: originalUrl });
+  } catch (error) {
+    if (error instanceof Error && error.message === 'LINK_NOT_FOUND') {
+      return res.status(404).json({
+        message: 'Link not found',
+      });
+    }
+
+    return res.status(500).json({
+      message: 'Failed to resolve link',
+    });
   }
 };
 
@@ -25,7 +61,7 @@ export const createLinkController = async (req: AuthRequest, res: Response) => {
 
     const link = await createLink({
       originalUrl: url,
-        userId,
+      userId,
     });
 
     const shortUrl = `${req.protocol}://${req.get('host')}/${link.shortCode}`;

@@ -3,6 +3,7 @@ import healthRoutes from './routes/health.routes.js';
 import authRoutes from './routes/auth.routes.js';
 import protectedRoutes from './routes/protected.routes.js';
 import linkRoutes from './routes/link.routes.js';
+import { resolveLinkController } from './controllers/link.controller.js';
 
 const app = express();
 
@@ -12,6 +13,7 @@ app.use(healthRoutes);
 app.use('/auth', authRoutes);
 app.use('/protected', protectedRoutes);
 app.use('/api', linkRoutes);
+app.get('/:code', resolveLinkController);
 
 app.listen(3000, () => {
   console.log('Server running');

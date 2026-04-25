@@ -87,3 +87,18 @@ export const resolveLink = async (
 
   return link.originalUrl;
 };
+
+export const getRecentLinks = async (userId?: string) => {
+  return await prisma.link.findMany({
+    where: {
+      userId,
+    },
+    include: {
+      user: true
+    },
+    orderBy: {
+      createdAt: 'desc',
+    },
+    take: 20,
+  });
+};

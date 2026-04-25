@@ -1,7 +1,7 @@
 import { prisma } from '../config/prisma.js';
 
 const generateShortCode = () => {
-  return Math.random().toString(36).substring(2, 8);
+  return Math.random().toString(36).substring(2, 10);
 };
 
 const generateUniqueShortCode = async (): Promise<string> => {

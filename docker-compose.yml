@@ -1,4 +1,4 @@
-version: '3.9'
+version: "3.9"
 
 services:
   db:
@@ -25,6 +25,17 @@ services:
     ports:
       - "${BACKEND_PORT:-3000}:3000"
     command: sh -c "npx prisma migrate deploy && node dist/server.js"
+
+  frontend:
+    build: ./frontend
+    container_name: link_frontend
+    depends_on:
+      - backend
+    environment:
+      VITE_API_URL: ${BACKEND_URL}
+    ports:
+      - "${FRONTEND_PORT:-5173}:5173"
+    command: npm run dev
 
 volumes:
   postgres_data:

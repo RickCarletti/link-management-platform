@@ -9,9 +9,11 @@ export const createLink = async (url: string) => {
     body: JSON.stringify({ url }),
   });
 
+  const data = await res.json();
+
   if (!res.ok) {
-    throw new Error('Failed to create link');
+    throw new Error(data.message || 'Failed to create link');
   }
 
-  return res.json();
+  return data;
 };

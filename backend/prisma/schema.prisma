@@ -10,7 +10,7 @@ model AuditLog {
   id        String   @id @default(uuid())
   tableName String
   recordId  String
-  action    String   // CREATE | UPDATE | DELETE
+  action    String // CREATE | UPDATE | DELETE
   oldData   Json?
   newData   Json?
   createdAt DateTime @default(now())
@@ -23,11 +23,27 @@ model User {
   password  String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  links Link[]
 }
 
 model Link {
+  id          String   @id @default(uuid())
+  originalUrl String
+  shortCode   String   @unique
+  createdAt   DateTime @default(now())
+  userId      String?
+
+  accesses Access[]
+  user     User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Access {
   id        String   @id @default(uuid())
-  original  String
-  shortCode String   @unique
+  linkId    String
+  ip        String?
+  userAgent String?
   createdAt DateTime @default(now())
+
+  link Link @relation(fields: [linkId], references: [id], onDelete: Cascade)
 }

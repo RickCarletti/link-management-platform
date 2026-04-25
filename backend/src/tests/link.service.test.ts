@@ -40,8 +40,6 @@ describe('Link Service', () => {
   });
 
   it('should throw error if link not found', async () => {
-    await expect(
-      resolveLink('invalid', {})
-    ).rejects.toThrow('LINK_NOT_FOUND');
+    await expect(resolveLink('invalid', {})).rejects.toThrow('LINK_NOT_FOUND');
   });
 });

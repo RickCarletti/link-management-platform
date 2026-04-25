@@ -4,9 +4,11 @@ import authRoutes from './routes/auth.routes.js';
 import protectedRoutes from './routes/protected.routes.js';
 import linkRoutes from './routes/link.routes.js';
 import { resolveLinkController } from './controllers/link.controller.js';
+import cors from 'cors';
 
 const app = express();
 
+app.use(cors());
 app.use(express.json());
 
 app.use(healthRoutes);

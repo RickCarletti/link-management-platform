@@ -1,19 +1,19 @@
-export const API_URL = 'http://localhost:3000/api';
+export const API_URL = "http://localhost:3000/api"
 
 export const createLink = async (url: string) => {
   const res = await fetch(`${API_URL}/links`, {
-    method: 'POST',
+    method: "POST",
     headers: {
-      'Content-Type': 'application/json',
+      "Content-Type": "application/json",
     },
     body: JSON.stringify({ url }),
-  });
+  })
 
-  const data = await res.json();
+  const data = await res.json()
 
   if (!res.ok) {
-    throw new Error(data.message || 'Failed to create link');
+    throw new Error(data.message || "Failed to create link")
   }
 
-  return data;
-};
+  return data
+}

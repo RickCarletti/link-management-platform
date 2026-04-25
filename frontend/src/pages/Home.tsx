@@ -1,47 +1,57 @@
-import { useState } from "react";
-import { createLink } from "../services/api";
-import { Card } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { CardContent } from "@/components/ui/card";
+import { useState } from "react"
+import { createLink } from "../services/api"
+import { Card } from "@/components/ui/card"
+import { Input } from "@/components/ui/input"
+import { Button } from "@/components/ui/button"
+import { CardContent } from "@/components/ui/card"
 
 export default function Home() {
-  const [url, setUrl] = useState("");
-  const [shortUrl, setShortUrl] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
+  const [url, setUrl] = useState("")
+  const [shortUrl, setShortUrl] = useState("")
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState("")
+  const [copied, setCopied] = useState(false)
 
   const isValidUrl = (value: string) => {
     try {
-      new URL(value);
-      return true;
+      new URL(value)
+      return true
     } catch {
-      return false;
+      return false
     }
-  };
+  }
 
   const handleSubmit = async () => {
-    setError("");
-    setShortUrl("");
+    setError("")
+    setShortUrl("")
 
     if (!url || !isValidUrl(url)) {
-      setError("URL inválida");
-      return;
+      setError("URL inválida")
+      return
     }
 
     try {
-      setLoading(true);
-      const data = await createLink(url);
-      setShortUrl(data.shortUrl);
+      setLoading(true)
+      const data = await createLink(url)
+      setShortUrl(data.shortUrl)
     } catch (err: any) {
-      setError(err.message || "Erro ao criar link");
+      setError(err.message || "Erro ao criar link")
     } finally {
-      setLoading(false);
+      setLoading(false)
     }
-  };
+  }
+
+  const handleCopy = async () => {
+    if (!shortUrl) return
+
+    await navigator.clipboard.writeText(shortUrl)
+    setCopied(true)
+
+    setTimeout(() => setCopied(false), 2000)
+  }
 
   return (
-    <div className="flex items-center justify-center min-h-screen">
+    <div className="flex min-h-screen items-center justify-center">
       <Card className="w-[420px]">
         <CardContent className="flex flex-col gap-4 p-6">
           <h1 className="text-xl font-semibold">URL Shortener</h1>
@@ -56,21 +66,25 @@ export default function Home() {
             {loading ? "Encurtando..." : "Encurtar"}
           </Button>
 
-          {error && (
-            <p className="text-sm text-red-500">{error}</p>
-          )}
+          {error && <p className="text-sm text-red-500">{error}</p>}
 
           {shortUrl && (
-            <a
-              href={shortUrl}
-              target="_blank"
-              className="text-primary underline break-all"
-            >
-              {shortUrl}
-            </a>
+            <div className="flex items-center gap-2">
+              <a
+                href={shortUrl}
+                target="_blank"
+                className="flex-1 break-all text-primary underline"
+              >
+                {shortUrl}
+              </a>
+
+              <Button variant="secondary" onClick={handleCopy}>
+                {copied ? "Copiado!" : "Copiar"}
+              </Button>
+            </div>
           )}
         </CardContent>
       </Card>
     </div>
-  );
+  )
 }

@@ -27,7 +27,7 @@ describe('GET /api/links/:shortCode/analytics', () => {
     await request(app).get(`/${link.shortCode}`);
 
     const res = await request(app).get(
-      `/api/links/${link.shortCode}/analytics`
+      `/api/links/${link.shortCode}/analytics`,
     );
 
     expect(res.status).toBe(200);
@@ -39,9 +39,7 @@ describe('GET /api/links/:shortCode/analytics', () => {
   });
 
   it('should return 404 when link does not exist', async () => {
-    const res = await request(app).get(
-      '/api/links/invalidcode/analytics'
-    );
+    const res = await request(app).get('/api/links/invalidcode/analytics');
 
     expect(res.status).toBe(404);
   });
@@ -56,7 +54,7 @@ describe('GET /api/links/:shortCode/analytics', () => {
       .set('X-Forwarded-For', '8.8.8.8');
 
     const res = await request(app).get(
-      `/api/links/${link.shortCode}/analytics`
+      `/api/links/${link.shortCode}/analytics`,
     );
 
     expect(res.status).toBe(200);

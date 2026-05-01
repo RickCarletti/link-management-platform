@@ -1,5 +1,10 @@
 import { Request, Response } from 'express';
-import { createLink, getRecentLinks, resolveLink } from '../services/link.service.js';
+import {
+  createLink,
+  getRecentLinks,
+  resolveLink,
+  getLinkAnalytics,
+} from '../services/link.service.js';
 import { AuthRequest } from '../middlewares/auth.middleware.js';
 
 const isValidUrl = (url: string) => {
@@ -90,6 +95,29 @@ export const getRecentLinksController = async (
   } catch (error) {
     return res.status(500).json({
       message: 'Failed to fetch recent links',
+    });
+  }
+};
+
+export const getLinkAnalyticsController = async (
+  req: AuthRequest,
+  res: Response,
+) => {
+  try {
+    const { shortCode } = req.params;
+    const analytics = await getLinkAnalytics(
+      Array.isArray(shortCode) ? shortCode[0] : shortCode,
+    );
+    return res.status(200).json(analytics);
+  } catch (error) {
+    if (error instanceof Error && error.message === 'LINK_NOT_FOUND') {
+      return res.status(404).json({
+        message: 'Link not found',
+      });
+    }
+
+    return res.status(500).json({
+      message: 'Failed to fetch link analytics',
     });
   }
 };

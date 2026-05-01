@@ -16,6 +16,9 @@ app.use(healthRoutes);
 app.use('/auth', authRoutes);
 app.use('/protected', protectedRoutes);
 app.use('/api', linkRoutes);
+app.use('/loaderio-3292611a424973d09cf2fc5e34949059', (req, res) => {
+  res.send('loaderio-3292611a424973d09cf2fc5e34949059');
+});
 app.get('/:code', resolveLinkController);
 
 app.listen(3000);

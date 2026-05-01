@@ -33,6 +33,7 @@ services:
       - backend
     environment:
       VITE_API_URL: ${BACKEND_URL}
+      VITE_MAPBOX_TOKEN: ${FRONTEND_MAPBOX_TOKEN}
     ports:
       - "${FRONTEND_PORT:-5173}:5173"
     command: npm run dev

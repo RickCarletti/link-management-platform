@@ -37,6 +37,23 @@ describe('GET /:code', () => {
 
     expect(res.status).toBe(404);
   });
+
+  it('should handle geo lookup', async () => {
+    const link = await createLink({
+      originalUrl: 'https://google.com',
+    });
+
+    const res = await request(app)
+      .get(`/${link.shortCode}`)
+      .set('X-Forwarded-For', '8.8.8.8');
+
+    const accesses = await prisma.access.findMany();
+    expect(accesses.length).toBe(1);
+    expect(accesses[0].country).toBeDefined();
+    expect(accesses[0].city).toBeDefined();
+    expect(accesses[0].lat).toBeDefined();
+    expect(accesses[0].lon).toBeDefined();
+  });
 });
 
 afterAll(async () => {

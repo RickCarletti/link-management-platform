@@ -1,7 +1,8 @@
+import { access } from 'node:fs';
 import { prisma } from '../config/prisma.js';
 
 const generateShortCode = () => {
-  return Math.random().toString(36).substring(2, 10);
+  return Math.random().toString(36).substring(2, 8);
 };
 
 const generateUniqueShortCode = async (): Promise<string> => {
@@ -77,11 +78,24 @@ export const resolveLink = async (
     throw new Error('LINK_NOT_FOUND');
   }
 
+  let geo = null;
+
+  try {
+    const tempIp = metadata.ip === '::1' ? '8.8.8.8' : metadata.ip;
+    geo = await getGeoFromIP(tempIp);
+  } catch (err) {
+    console.error('Geo lookup failed', err);
+  }
+
   await prisma.access.create({
     data: {
       linkId: link.id,
       ip: metadata.ip,
       userAgent: metadata.userAgent,
+      country: geo?.country,
+      city: geo?.city,
+      lat: geo?.lat,
+      lon: geo?.lon,
     },
   });
 
@@ -94,11 +108,40 @@ export const getRecentLinks = async (userId?: string) => {
       userId,
     },
     include: {
-      user: true
+      user: true,
     },
     orderBy: {
       createdAt: 'desc',
     },
     take: 20,
   });
+};
+
+export const getGeoFromIP = async (ip?: string) => {
+  if (!ip) return null;
+
+  const res = await fetch(`http://ip-api.com/json/${ip}`);
+  const data = await res.json();
+
+  return {
+    country: data.country,
+    city: data.city,
+    lat: data.lat,
+    lon: data.lon,
+  };
+};
+
+export const getLinkAnalytics = async (shortCode: string) => {
+  const link = await prisma.link.findUnique({
+    where: { shortCode },
+    include: {
+      accesses: true,
+    },
+  });
+
+  if (!link) {
+    throw new Error('LINK_NOT_FOUND');
+  }
+
+  return link;
 };

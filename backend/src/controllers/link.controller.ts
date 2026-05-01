@@ -20,17 +20,7 @@ export const resolveLinkController = async (req: Request, res: Response) => {
   try {
     const { code } = req.params;
 
-    const forwardedFor = req.headers['x-forwarded-for'];
-
-    let ip =
-      typeof forwardedFor === 'string'
-        ? forwardedFor.split(',')[0].trim()
-        : req.socket.remoteAddress || '';
-
-    if (ip.startsWith('::ffff:')) {
-      ip = ip.replace('::ffff:', '');
-    }
-
+    const ip = req.ip;
     const userAgent = req.headers['user-agent'];
 
     const originalUrl = await resolveLink(

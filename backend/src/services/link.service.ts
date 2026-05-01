@@ -110,7 +110,26 @@ export const getLinkAnalytics = async (shortCode: string) => {
     throw new Error('LINK_NOT_FOUND');
   }
 
-  return link;
+  // Mapeia os acessos para remover/mascarar dados sensíveis
+  const safeAccesses = link.accesses.map((access) => {
+    return {
+      ...access,
+      // 1. Mascarar o IP: substitui os dois últimos octetos por 'xx'
+      ip: access.ip
+        ? access.ip.replace(/(\d+)\.(\d+)\.(\d+)\.(\d+)/, '$1.$2.xx.xx')
+        : null,
+
+      // 2. Arredondar coordenadas para 2 casas decimais
+      // Isso aponta para uma área de ~1km, mantendo o anonimato
+      latitude: access.lat ? Number(access.lat.toFixed(2)) : null,
+      longitude: access.lon ? Number(access.lon.toFixed(2)) : null,
+    };
+  });
+
+  return {
+    ...link,
+    accesses: safeAccesses,
+  };
 };
 
 export const trackAccess = async (

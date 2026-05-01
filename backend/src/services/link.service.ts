@@ -123,6 +123,16 @@ export const getLinkAnalytics = async (shortCode: string) => {
       // Isso aponta para uma área de ~1km, mantendo o anonimato
       lat: access.lat ? Number(access.lat.toFixed(2)) : null,
       lon: access.lon ? Number(access.lon.toFixed(2)) : null,
+
+      // 3. Manter userAgent, mas mascarado para mostrar apenas o tipo de dispositivo e navegador
+
+      userAgent: access.userAgent
+        ? access.userAgent
+            .replace(/(Mozilla\/\d+\.\d+ \([^)]+\))/, '$1') // Mantém a parte principal do userAgent
+            .replace(/AppleWebKit\/\d+\.\d+/, 'AppleWebKit/xx.xx') // Mascarar versão do WebKit
+            .replace(/Chrome\/\d+\.\d+\.\d+\.\d+/, 'Chrome/xx.xx.xx.xx') // Mascarar versão do Chrome
+            .replace(/Safari\/\d+\.\d+/, 'Safari/xx.xx') // Mascarar versão do Safari
+        : 'Unknown',
     };
   });
 

@@ -1,11 +1,14 @@
 import { createLink, resolveLink } from '../services/link.service.js';
 import { prisma } from '../config/prisma.js';
 
+const AWAIT_TIMEOUT = 1000;
+
 describe('Link Service', () => {
   beforeEach(async () => {
     await prisma.auditLog.deleteMany();
     await prisma.access.deleteMany();
     await prisma.link.deleteMany();
+    await prisma.ipCache.deleteMany();
   });
 
   it('should create a link and generate audit log', async () => {
@@ -34,6 +37,8 @@ describe('Link Service', () => {
     });
 
     expect(url).toBe('https://google.com');
+
+    await new Promise((r) => setTimeout(r, AWAIT_TIMEOUT));
 
     const accesses = await prisma.access.findMany();
     expect(accesses.length).toBe(1);

@@ -44,6 +44,10 @@ model Access {
   linkId    String
   ip        String?
   userAgent String?
+  country   String?
+  city      String?
+  lat       Float?
+  lon       Float?
   createdAt DateTime @default(now())
 
   link Link @relation(fields: [linkId], references: [id], onDelete: Cascade)

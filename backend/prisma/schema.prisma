@@ -52,3 +52,14 @@ model Access {
 
   link Link @relation(fields: [linkId], references: [id], onDelete: Cascade)
 }
+
+model IpCache {
+  id        String   @id @default(uuid())
+  ip        String   @unique
+  country   String?
+  city      String?
+  lat       Float?
+  lon       Float?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}

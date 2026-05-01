@@ -13,7 +13,6 @@ const JWT_SECRET = process.env.JWT_SECRET || 'secret';
 describe('POST /links', () => {
   beforeEach(async () => {
     await prisma.auditLog.deleteMany();
-    await prisma.access.deleteMany();
     await prisma.link.deleteMany();
     await prisma.user.deleteMany();
   });

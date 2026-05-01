@@ -4,6 +4,7 @@ import linkRoutes from '../routes/link.routes.js';
 import { prisma } from '../config/prisma.js';
 import { createLink } from '../services/link.service.js';
 
+const AWAIT_TIMEOUT = 1000;
 const app = express();
 app.use(express.json());
 app.use('/', linkRoutes);
@@ -13,6 +14,7 @@ describe('GET /:code', () => {
     await prisma.auditLog.deleteMany();
     await prisma.access.deleteMany();
     await prisma.link.deleteMany();
+    await prisma.ipCache.deleteMany();
   });
 
   it('should redirect to original URL and log access', async () => {
@@ -24,6 +26,8 @@ describe('GET /:code', () => {
 
     expect(res.status).toBe(302);
     expect(res.headers.location).toBe('https://google.com');
+
+    await new Promise((r) => setTimeout(r, AWAIT_TIMEOUT));
 
     const accesses = await prisma.access.findMany();
     expect(accesses.length).toBe(1);
@@ -46,6 +50,8 @@ describe('GET /:code', () => {
     const res = await request(app)
       .get(`/${link.shortCode}`)
       .set('X-Forwarded-For', '8.8.8.8');
+
+    await new Promise((r) => setTimeout(r, AWAIT_TIMEOUT));
 
     const accesses = await prisma.access.findMany();
     expect(accesses.length).toBe(1);

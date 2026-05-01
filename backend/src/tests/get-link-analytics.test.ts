@@ -5,6 +5,8 @@ import { prisma } from '../config/prisma.js';
 import { createLink } from '../services/link.service.js';
 import { resolveLinkController } from '../controllers/link.controller.js';
 
+const AWAIT_TIMEOUT = 1000;
+
 const app = express();
 
 app.use(express.json());
@@ -16,6 +18,7 @@ describe('GET /api/links/:shortCode/analytics', () => {
     await prisma.auditLog.deleteMany();
     await prisma.access.deleteMany();
     await prisma.link.deleteMany();
+    await prisma.ipCache.deleteMany();
   });
 
   it('should return analytics for a valid shortCode', async () => {
@@ -26,12 +29,13 @@ describe('GET /api/links/:shortCode/analytics', () => {
     await request(app).get(`/${link.shortCode}`);
     await request(app).get(`/${link.shortCode}`);
 
+    await new Promise((r) => setTimeout(r, AWAIT_TIMEOUT));
+
     const res = await request(app).get(
       `/api/links/${link.shortCode}/analytics`,
     );
 
     expect(res.status).toBe(200);
-
     expect(res.body.shortCode).toBe(link.shortCode);
     expect(res.body.originalUrl).toBe('https://google.com');
     expect(res.body.accesses).toBeDefined();
@@ -52,6 +56,8 @@ describe('GET /api/links/:shortCode/analytics', () => {
     await request(app)
       .get(`/${link.shortCode}`)
       .set('X-Forwarded-For', '8.8.8.8');
+
+    await new Promise((r) => setTimeout(r, AWAIT_TIMEOUT));
 
     const res = await request(app).get(
       `/api/links/${link.shortCode}/analytics`,

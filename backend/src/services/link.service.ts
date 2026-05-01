@@ -1,5 +1,5 @@
-import { access } from 'node:fs';
 import { prisma } from '../config/prisma.js';
+import { getGeoData } from './ip.service.js';
 
 const generateShortCode = () => {
   return Math.random().toString(36).substring(2, 8);
@@ -78,26 +78,7 @@ export const resolveLink = async (
     throw new Error('LINK_NOT_FOUND');
   }
 
-  let geo = null;
-
-  try {
-    const tempIp = metadata.ip === '::1' ? '8.8.8.8' : metadata.ip;
-    geo = await getGeoFromIP(tempIp);
-  } catch (err) {
-    console.error('Geo lookup failed', err);
-  }
-
-  await prisma.access.create({
-    data: {
-      linkId: link.id,
-      ip: metadata.ip,
-      userAgent: metadata.userAgent,
-      country: geo?.country,
-      city: geo?.city,
-      lat: geo?.lat,
-      lon: geo?.lon,
-    },
-  });
+  void trackAccess(link.id, metadata);
 
   return link.originalUrl;
 };
@@ -117,20 +98,6 @@ export const getRecentLinks = async (userId?: string) => {
   });
 };
 
-export const getGeoFromIP = async (ip?: string) => {
-  if (!ip) return null;
-
-  const res = await fetch(`http://ip-api.com/json/${ip}`);
-  const data = await res.json();
-
-  return {
-    country: data.country,
-    city: data.city,
-    lat: data.lat,
-    lon: data.lon,
-  };
-};
-
 export const getLinkAnalytics = async (shortCode: string) => {
   const link = await prisma.link.findUnique({
     where: { shortCode },
@@ -144,4 +111,27 @@ export const getLinkAnalytics = async (shortCode: string) => {
   }
 
   return link;
+};
+
+export const trackAccess = async (
+  linkId: string,
+  metadata: { ip?: string; userAgent?: string },
+) => {
+  try {
+    const geo = await getGeoData(metadata.ip);
+
+    await prisma.access.create({
+      data: {
+        linkId,
+        ip: metadata.ip,
+        userAgent: metadata.userAgent,
+        country: geo?.country,
+        city: geo?.city,
+        lat: geo?.lat,
+        lon: geo?.lon,
+      },
+    });
+  } catch (error) {
+    console.error('Track access failed:', error);
+  }
 };

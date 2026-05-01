@@ -18,4 +18,4 @@ app.use('/protected', protectedRoutes);
 app.use('/api', linkRoutes);
 app.get('/:code', resolveLinkController);
 
-app.listen(3000, '127.0.0.1');
+app.listen(3000);

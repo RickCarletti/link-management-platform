@@ -8,6 +8,7 @@ import cors from 'cors';
 
 const app = express();
 
+app.set('trust proxy', '127.0.0.1');
 app.use(cors());
 app.use(express.json());
 
@@ -17,6 +18,4 @@ app.use('/protected', protectedRoutes);
 app.use('/api', linkRoutes);
 app.get('/:code', resolveLinkController);
 
-app.listen(3000, () => {
-  console.log('Server running');
-});
+app.listen(3000, '127.0.0.1');

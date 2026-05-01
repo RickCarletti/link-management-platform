@@ -20,9 +20,16 @@ export const resolveLinkController = async (req: Request, res: Response) => {
   try {
     const { code } = req.params;
 
-    const ip =
-      req.headers['x-forwarded-for']?.toString().split(',')[0] ||
-      req.socket.remoteAddress;
+    const forwardedFor = req.headers['x-forwarded-for'];
+
+    let ip =
+      typeof forwardedFor === 'string'
+        ? forwardedFor.split(',')[0].trim()
+        : req.socket.remoteAddress || '';
+
+    if (ip.startsWith('::ffff:')) {
+      ip = ip.replace('::ffff:', '');
+    }
 
     const userAgent = req.headers['user-agent'];
 
@@ -34,11 +41,7 @@ export const resolveLinkController = async (req: Request, res: Response) => {
       },
     );
 
-    // redirect real para a URL original
     return res.redirect(302, originalUrl);
-
-    // alternativa sem redirecionamento, apenas retornando a URL original
-    // return res.status(200).json({ url: originalUrl });
   } catch (error) {
     if (error instanceof Error && error.message === 'LINK_NOT_FOUND') {
       return res.status(404).json({

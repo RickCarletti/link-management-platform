@@ -1,14 +1,30 @@
 import { useEffect, useState, type ReactNode } from "react"
 import { Button } from "@/components/ui/button"
 import { ScrollArea } from "@/components/ui/scroll-area"
-import { getRecentLinks, API_URL } from "@/services/api"
+import { toast } from "sonner"
+import {
+  getRecentLinks,
+  API_URL,
+  registerUser,
+  loginUser,
+} from "@/services/api"
 import { useNavigate } from "react-router-dom"
 import logo from "../../assets/link-manegement.png"
+import { useAuth } from "@/context/AuthContext"
 
 export default function AppLayout({ children }: { children: ReactNode }) {
   const [recentLinks, setRecentLinks] = useState<any[]>([])
   const [loading, setLoading] = useState(false)
   const [showSidebar, setShowSidebar] = useState(false)
+  const [showAuthModal, setShowAuthModal] = useState(false)
+  const [isRegister, setIsRegister] = useState(false)
+  const { user, login, logout } = useAuth()
+
+  const [authForm, setAuthForm] = useState({
+    name: "",
+    email: "",
+    password: "",
+  })
 
   const navigate = useNavigate()
 
@@ -28,6 +44,45 @@ export default function AppLayout({ children }: { children: ReactNode }) {
     fetchLinks()
   }, [])
 
+  const handleAuth = async () => {
+    try {
+      let loginResponse
+
+      if (isRegister) {
+        await registerUser({
+          name: authForm.name,
+          email: authForm.email,
+          password: authForm.password,
+        })
+
+        toast.success("Conta criada com sucesso")
+      }
+
+      loginResponse = await loginUser({
+        email: authForm.email,
+        password: authForm.password,
+      })
+      login(loginResponse)
+
+      toast.success("Login realizado com sucesso")
+
+      setAuthForm({
+        name: "",
+        email: "",
+        password: "",
+      })
+
+      setShowAuthModal(false)
+    } catch (error: any) {
+      toast.error(error.message || "Algo deu errado")
+    }
+  }
+
+  const handleLogout = () => {
+    logout()
+    toast.success("Sessão encerrada")
+  }
+
   return (
     <div className="flex min-h-screen flex-col">
       {/* TOPBAR */}
@@ -40,13 +95,39 @@ export default function AppLayout({ children }: { children: ReactNode }) {
           URL Shortener
         </button>
 
-        <Button
-          className="lg:hidden"
-          size="sm"
-          onClick={() => setShowSidebar(true)}
-        >
-          Links
-        </Button>
+        <div className="flex items-center gap-2">
+          {user ? (
+            <>
+              <span className="text-sm">Olá, {user.name}</span>
+
+              <Button
+                className="cursor-pointer"
+                variant="outline"
+                size="sm"
+                onClick={handleLogout}
+              >
+                Sair
+              </Button>
+            </>
+          ) : (
+            <Button
+              variant="outline"
+              size="sm"
+              className="cursor-pointer"
+              onClick={() => setShowAuthModal(true)}
+            >
+              Entrar
+            </Button>
+          )}
+
+          <Button
+            className="cursor-pointer lg:hidden"
+            size="sm"
+            onClick={() => setShowSidebar(true)}
+          >
+            Links
+          </Button>
+        </div>
       </div>
 
       {/* CONTENT */}
@@ -83,6 +164,64 @@ export default function AppLayout({ children }: { children: ReactNode }) {
               fetchLinks={fetchLinks}
               navigate={navigate}
             />
+          </div>
+        </div>
+      )}
+      {showAuthModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+          <div className="w-[400px] rounded-xl border bg-background p-6 shadow-xl">
+            <h2 className="mb-4 text-lg font-semibold">
+              {isRegister ? "Criar conta" : "Entrar"}
+            </h2>
+
+            <div className="flex flex-col gap-3">
+              {isRegister && (
+                <input
+                  className="rounded-md border p-2"
+                  placeholder="Nome"
+                  value={authForm.name}
+                  onChange={(e) =>
+                    setAuthForm({ ...authForm, name: e.target.value })
+                  }
+                />
+              )}
+
+              <input
+                className="rounded-md border p-2"
+                placeholder="Email"
+                value={authForm.email}
+                onChange={(e) =>
+                  setAuthForm({ ...authForm, email: e.target.value })
+                }
+              />
+
+              <input
+                type="password"
+                className="rounded-md border p-2"
+                placeholder="Senha"
+                value={authForm.password}
+                onChange={(e) =>
+                  setAuthForm({ ...authForm, password: e.target.value })
+                }
+              />
+
+              <Button onClick={handleAuth}>
+                {isRegister ? "Registrar" : "Entrar"}
+              </Button>
+
+              <button
+                className="text-sm text-primary underline"
+                onClick={() => setIsRegister(!isRegister)}
+              >
+                {isRegister
+                  ? "Já possui conta? Entrar"
+                  : "Não possui conta? Criar conta"}
+              </button>
+
+              <Button variant="ghost" onClick={() => setShowAuthModal(false)}>
+                Fechar
+              </Button>
+            </div>
           </div>
         </div>
       )}

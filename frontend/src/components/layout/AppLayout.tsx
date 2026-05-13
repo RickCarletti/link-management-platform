@@ -98,6 +98,14 @@ export default function AppLayout({ children }: { children: ReactNode }) {
         <div className="flex items-center gap-2">
           {user ? (
             <>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => navigate("/dashboard")}
+              >
+                Dashboard
+              </Button>
+
               <span className="text-sm">Olá, {user.name}</span>
 
               <Button

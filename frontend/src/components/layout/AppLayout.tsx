@@ -10,6 +10,7 @@ import {
 } from "@/services/api"
 import { useNavigate } from "react-router-dom"
 import logo from "../../assets/link-manegement.png"
+import { useAuth } from "@/context/AuthContext"
 
 export default function AppLayout({ children }: { children: ReactNode }) {
   const [recentLinks, setRecentLinks] = useState<any[]>([])
@@ -17,11 +18,7 @@ export default function AppLayout({ children }: { children: ReactNode }) {
   const [showSidebar, setShowSidebar] = useState(false)
   const [showAuthModal, setShowAuthModal] = useState(false)
   const [isRegister, setIsRegister] = useState(false)
-
-  const [user, setUser] = useState<any>(() => {
-    const saved = localStorage.getItem("user")
-    return saved ? JSON.parse(saved) : null
-  })
+  const { user, login, logout } = useAuth()
 
   const [authForm, setAuthForm] = useState({
     name: "",
@@ -57,6 +54,7 @@ export default function AppLayout({ children }: { children: ReactNode }) {
           email: authForm.email,
           password: authForm.password,
         })
+
         toast.success("Conta criada com sucesso")
       }
 
@@ -64,12 +62,9 @@ export default function AppLayout({ children }: { children: ReactNode }) {
         email: authForm.email,
         password: authForm.password,
       })
+      login(loginResponse)
+
       toast.success("Login realizado com sucesso")
-
-      localStorage.setItem("token", loginResponse.token)
-      localStorage.setItem("user", JSON.stringify(loginResponse.user))
-
-      setUser(loginResponse.user)
 
       setAuthForm({
         name: "",
@@ -79,15 +74,12 @@ export default function AppLayout({ children }: { children: ReactNode }) {
 
       setShowAuthModal(false)
     } catch (error: any) {
-      console.error(error)
       toast.error(error.message || "Algo deu errado")
     }
   }
 
   const handleLogout = () => {
-    localStorage.removeItem("token")
-    localStorage.removeItem("user")
-    setUser(null)
+    logout()
     toast.success("Sessão encerrada")
   }
 

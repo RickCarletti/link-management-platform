@@ -4,6 +4,7 @@ import {
   getRecentLinks,
   resolveLink,
   getLinkAnalytics,
+  getMyLinks,
 } from '../services/link.service.js';
 import { AuthRequest } from '../middlewares/auth.middleware.js';
 
@@ -111,6 +112,26 @@ export const getLinkAnalyticsController = async (
 
     return res.status(500).json({
       message: 'Failed to fetch link analytics',
+    });
+  }
+};
+
+export const getMyLinksController = async (req: AuthRequest, res: Response) => {
+  try {
+    const userId = req.user?.userId;
+
+    if (!userId) { // não deveria acontecer se o auth middleware estiver configurado corretamente
+      return res.status(401).json({
+        message: 'Unauthorized',
+      });
+    }
+
+    const myLinks = await getMyLinks(userId);
+
+    return res.status(200).json(myLinks);
+  } catch (error) {
+    return res.status(500).json({
+      message: 'Failed to fetch user links',
     });
   }
 };

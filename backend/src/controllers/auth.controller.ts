@@ -44,9 +44,12 @@ export const login = async (req: Request, res: Response) => {
 
     const user = await authenticateUser(email, password);
 
+    const { password: _, ...safeUser } = user;
+
     const token = generateToken({ userId: user.id });
 
     return res.status(200).json({
+      user: safeUser,
       token,
     });
   } catch (error: any) {

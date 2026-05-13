@@ -5,6 +5,7 @@ export const createLink = async (url: string) => {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
+      Authorization: `Bearer ${localStorage.getItem("token")}`,
     },
     body: JSON.stringify({ url }),
   })
@@ -91,4 +92,20 @@ export const loginUser = async (payload: {
   }
 
   return data
+}
+
+export const getMyLinks = async () => {
+  const token = localStorage.getItem("token")
+
+  const response = await fetch(`${API_URL}api/links/me`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  })
+
+  if (!response.ok) {
+    throw new Error("Erro ao carregar links")
+  }
+
+  return response.json()
 }

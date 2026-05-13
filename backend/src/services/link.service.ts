@@ -164,3 +164,14 @@ export const trackAccess = async (
     console.error('Track access failed:', error);
   }
 };
+
+export const getMyLinks = async (userId: string) => {
+  return await prisma.link.findMany({
+    where: {
+      userId,
+    },
+    orderBy: {
+      createdAt: 'desc',
+    },
+  });
+};
